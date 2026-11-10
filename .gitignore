@@ -1,0 +1,9 @@
+# 运行时凭据与日志：绝不提交（由 gist 同步，仅存在于 Actions 运行器）
+qoder_config.json
+qoder_accounts.json
+.qoder_token_cache.json
+*.log
+
+# Python
+__pycache__/
+*.pyc
