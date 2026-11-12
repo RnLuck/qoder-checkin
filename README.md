@@ -8,7 +8,7 @@
 | --- | --- |
 | 仓库 | `RnLuck/qoder-checkin`（公开；**不含任何凭据**） |
 | 工作流 | `.github/workflows/checkin.yml` |
-| 定时 | cron `10 2 * * *`（UTC）= **北京时间每天 10:10** |
+| 定时 | 多时段兜底（UTC→北京）：`10 2`=10:10 主、`10 3`=11:10、`10 5`=13:10、`10 7`=15:10、`10 11`=19:10 |
 | 凭据存储 | 私有 Gist（ID 保存在仓库 Secret `GIST_ID`，值不外泄） |
 | 令牌回写 | 每次运行用 Secret `GH_GIST_TOKEN` 拉取 / 回写 Gist |
 | 端点 | `https://openapi.qoder.sh`（国际服） |
@@ -78,8 +78,8 @@ D:\Files\Code\Qoder\workspace\qoder-checkin\qoder\qoder_checkin.log   (JSON 行�
 2. **60 天不活跃会被 GitHub 自动停用定时**
    GitHub 对连续 60 天无提交/活动的仓库会禁用 scheduled workflow。每日签到本身不产生提交，长期可能触发。若发现不再自动跑：去 Actions 页面点 **Enable workflow**，或手动 `gh workflow run checkin.yml -R RnLuck/qoder-checkin` 一次即可恢复。
 
-3. **cron 高峰期可能延迟几分钟**
-   脚本内置「活动未下发就本次运行内重查 3 次 × 20 秒」的兜底，10:00 刷新后的短暂抖动不影响领取。
+3. **GitHub 定时不可靠，已用多时段兜底**
+   `schedule` 是「尽力而为」：高峰会延迟甚至丢弃，免费账号常被降优先级（实测 2026-11-11 的定时晚了约 7 小时，11-12 到 10:51 仍未触发）。因此设了 5 个时段（北京 10:10/11:10/13:10/15:10/19:10），任一时段成功即可，领取幂等不会重复发币。若某天 5 个时段全被丢（极少见），手动 `gh workflow run checkin.yml -R RnLuck/qoder-checkin` 补一次。脚本另有「活动未下发就本次运行内重查 3 次 × 20 秒」兜底，应对 10:00 刷新后的短暂抖动。
 
 4. **安全说明**
    - 仓库虽公开，但**只有脚本代码**（源自公开 MIT 项目）；token、Gist ID 均在 Secrets / 私有 Gist 中，外人读不到。
